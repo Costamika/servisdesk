@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Сервис-деск система{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> {{ title }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-exclamation-triangle"></i> Внимание!
+                    </h6>
+                    <p class="mb-0">
+                        Вы собираетесь удалить заявку. Это действие нельзя отменить.
+                    </p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Информация о заявке</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Название:</strong> {{ ticket.title }}</p>
+                                <p><strong>Статус:</strong> 
+                                    <span class="badge bg-{{ ticket.get_status_color }}">
+                                        {{ ticket.get_status_display }}
+                                    </span>
+                                </p>
+                                <p><strong>Приоритет:</strong> 
+                                    <span class="badge bg-{{ ticket.get_priority_color }}">
+                                        {{ ticket.get_priority_display }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Создатель:</strong> {{ ticket.created_by.get_full_name }}</p>
+                                <p><strong>Исполнитель:</strong> 
+                                    {% if ticket.assigned_to %}
+                                        {{ ticket.assigned_to.get_full_name }}
+                                    {% else %}
+                                        <span class="text-muted">Не назначен</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>Дата создания:</strong> {{ ticket.created_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if ticket.description %}
+                        <div class="mt-3">
+                            <p><strong>Описание:</strong></p>
+                            <div class="border rounded p-3 bg-light">
+                                {{ ticket.description|linebreaks }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Удалить заявку
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

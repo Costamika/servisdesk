@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}Заявки - Сервис-деск система{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Поиск и фильтры -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-search"></i> Поиск и фильтры
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    {% for field in search_form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger small">
+                                {% for error in field.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Найти
+                        </button>
+                        <a href="{% url 'tickets:ticket_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Сбросить
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Список заявок -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ul"></i> 
+                    {% if is_admin %}Все заявки{% else %}Мои заявки{% endif %}
+                    <span class="badge bg-secondary ms-2">{{ total_tickets }}</span>
+                </h5>
+                <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Создать заявку
+                </a>
+            </div>
+            <div class="card-body">
+                {% if page_obj %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Заголовок</th>
+                                    <th>Статус</th>
+                                    <th>Приоритет</th>
+                                    {% if is_admin %}
+                                    <th>Создатель</th>
+                                    <th>Исполнитель</th>
+                                    {% endif %}
+                                    <th>Дата создания</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket in page_obj %}
+                                <tr>
+                                    <td>{{ ticket.id }}</td>
+                                    <td>
+                                        <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="text-decoration-none">
+                                            {{ ticket.title|truncatechars:50 }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge status-{{ ticket.status }}">
+                                            {{ ticket.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge priority-{{ ticket.priority }}">
+                                            {{ ticket.get_priority_display }}
+                                        </span>
+                                    </td>
+                                    {% if is_admin %}
+                                    <td>
+                                        <small>{{ ticket.created_by.get_full_name|default:ticket.created_by.username }}</small>
+                                    </td>
+                                    <td>
+                                        {% if ticket.assigned_to %}
+                                            <small>{{ ticket.assigned_to.get_full_name|default:ticket.assigned_to.username }}</small>
+                                        {% else %}
+                                            <small class="text-muted">Не назначен</small>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    <td>
+                                        <small>{{ ticket.created_at|date:"d.m.Y H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-outline-primary" title="Просмотр">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% if user == ticket.created_by or user.is_staff or user.is_superuser or user == ticket.assigned_to %}
+                                            <a href="{% url 'tickets:ticket_edit' ticket.id %}" class="btn btn-outline-secondary" title="Редактировать">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            {% endif %}
+                                            {% if user.is_staff or user.is_superuser %}
+                                            <a href="{% url 'tickets:ticket_delete' ticket.id %}" class="btn btn-outline-danger" title="Удалить">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Пагинация -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Навигация по страницам">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                        <h5 class="text-muted mt-3">
+                            {% if request.GET %}
+                                По вашему запросу ничего не найдено
+                            {% else %}
+                                {% if is_admin %}
+                                    Пока нет заявок в системе
+                                {% else %}
+                                    У вас пока нет заявок
+                                {% endif %}
+                            {% endif %}
+                        </h5>
+                        <p class="text-muted">
+                            {% if request.GET %}
+                                Попробуйте изменить параметры поиска
+                            {% else %}
+                                Создайте свою первую заявку
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Создать заявку
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

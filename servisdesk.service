@@ -1,0 +1,23 @@
+[Unit]
+Description=Сервис-деск система
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/servisdesk
+Environment="PATH=/var/www/servisdesk/venv/bin"
+Environment="DJANGO_SETTINGS_MODULE=servisdesk.settings_production"
+Environment="SECRET_KEY=your-secret-key-here"
+Environment="ALLOWED_HOSTS=192.168.0.149,your-domain.com,www.your-domain.com"
+ExecStart=/var/www/servisdesk/venv/bin/gunicorn --config gunicorn.conf.py servisdesk.wsgi_production:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

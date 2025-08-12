@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Сервис-деск система{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Статистика -->
+    <div class="col-md-3 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-ticket-detailed text-primary" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">{{ total_tickets }}</h5>
+                <p class="card-text text-muted">Всего заявок</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-exclamation-circle text-danger" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">{{ new_tickets }}</h5>
+                <p class="card-text text-muted">Новых заявок</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-gear text-warning" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">{{ in_progress_tickets }}</h5>
+                <p class="card-text text-muted">В работе</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">{{ resolved_tickets }}</h5>
+                <p class="card-text text-muted">Решено</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if is_admin %}
+<!-- Дополнительная статистика для администраторов -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people text-info" style="font-size: 2rem;"></i>
+                <h5 class="card-title mt-2">{{ total_users }}</h5>
+                <p class="card-text text-muted">Пользователей</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Быстрые действия -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning"></i> Быстрые действия
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Создать заявку
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'tickets:ticket_list' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-list-ul"></i> Все заявки
+                        </a>
+                    </div>
+                    {% if is_admin %}
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-people"></i> Пользователи
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Последние заявки -->
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> 
+                    {% if is_admin %}Последние заявки{% else %}Мои последние заявки{% endif %}
+                </h5>
+                <a href="{% url 'tickets:ticket_list' %}" class="btn btn-sm btn-outline-primary">
+                    Все заявки
+                </a>
+            </div>
+            <div class="card-body">
+                {% if recent_tickets %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Заголовок</th>
+                                    <th>Статус</th>
+                                    <th>Приоритет</th>
+                                    {% if is_admin %}
+                                    <th>Создатель</th>
+                                    {% endif %}
+                                    <th>Дата создания</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket in recent_tickets %}
+                                <tr>
+                                    <td>{{ ticket.id }}</td>
+                                    <td>
+                                        <a href="{% url 'tickets:ticket_detail' ticket.id %}">
+                                            {{ ticket.title|truncatechars:50 }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge status-{{ ticket.status }}">
+                                            {{ ticket.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge priority-{{ ticket.priority }}">
+                                            {{ ticket.get_priority_display }}
+                                        </span>
+                                    </td>
+                                    {% if is_admin %}
+                                    <td>{{ ticket.created_by.get_full_name|default:ticket.created_by.username }}</td>
+                                    {% endif %}
+                                    <td>{{ ticket.created_at|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2">
+                            {% if is_admin %}
+                                Пока нет заявок в системе
+                            {% else %}
+                                У вас пока нет заявок
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Создать первую заявку
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
