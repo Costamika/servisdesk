@@ -1,0 +1,179 @@
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | migrations
+  | venv
+  | product
+  | logs
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip = ["venv", "migrations", "product", "logs", "__pycache__"]
+known_first_party = ["servisdesk", "tickets", "users"]
+known_django = ["django"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.bandit]
+exclude_dirs = ["venv", "migrations", "product", "logs", "__pycache__"]
+skips = ["B101", "B601"]
+
+[tool.pytest.ini_options]
+testpaths = ["tickets/tests", "users/tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["tickets", "users", "servisdesk"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/product/*",
+    "*/logs/*",
+    "*/__pycache__/*",
+    "*/wsgi.py",
+    "*/asgi.py",
+    "*/manage.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "django.*",
+    "django.contrib.*",
+    "django.db.*",
+    "django.http.*",
+    "django.shortcuts.*",
+    "django.utils.*",
+]
+ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "E203",  # whitespace before ':', handled by black
+    "F401",  # imported but unused, handled by autoflake
+    "F403",  # wildcard import, used in settings
+    "F841",  # local variable assigned but never used
+    "E402",  # module level import not at top of file, used in scripts
+    "E302",  # expected 2 blank lines, found 1
+    "E305",  # expected 2 blank lines after class or function definition, found 1
+    "W291",  # trailing whitespace, handled by black
+    "W293",  # blank line contains whitespace, handled by black
+    "D100",  # missing-module-docstring
+    "D101",  # missing-class-docstring
+    "D102",  # missing-function-docstring
+    "N801",  # invalid-name (migration files)
+    "I001",  # wrong-import-order (handled by isort)
+]
+exclude = [
+    ".git",
+    "__pycache__",
+    "venv",
+    "migrations",
+    "product",
+    "logs",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".Python",
+    "env",
+    "pip-log.txt",
+    "pip-delete-this-directory.txt",
+    ".tox",
+    ".coverage",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".hypothesis",
+    ".eggs",
+    "*.egg",
+    "MANIFEST",
+    ".env",
+    ".venv",
+    "env/",
+    "venv/",
+    "ENV/",
+    "env.bak/",
+    "venv.bak/",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"migrations/*" = ["E501", "F401"]
+"wsgi_production.py" = ["E402"]
+"create_test_data.py" = ["E402", "F401"]
+"setup_admin.py" = ["E402", "F401"]
+"gunicorn.conf.py" = ["E302", "E305"]
+"settings_production.py" = ["F403", "F401"]
+"admin.py" = ["F401"]
+"tests.py" = ["F401"]
+"apps.py" = ["F401"]
+"urls.py" = ["W293", "E501"]
+"forms.py" = ["W291", "W293", "E501"]
+"models.py" = ["W291", "W293", "E501"]
+"views.py" = ["W291", "W293", "E501"]
