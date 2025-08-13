@@ -1,15 +1,15 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from typing import Optional
 
 
 class UserProfile(models.Model):
     """
     Расширенная модель профиля пользователя
     """
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
     department = models.CharField(max_length=100, blank=True, verbose_name="Отдел")
     position = models.CharField(max_length=100, blank=True, verbose_name="Должность")
@@ -44,5 +44,5 @@ def save_user_profile(sender: type, instance: User, **kwargs) -> None:
     """
     Сигнал для автоматического сохранения профиля при изменении пользователя
     """
-    if hasattr(instance, 'profile'):
+    if hasattr(instance, "profile"):
         instance.profile.save()
