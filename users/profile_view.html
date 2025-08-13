@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Сервис-деск система{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-circle"></i> {{ title }}
+                </h5>
+                <a href="{% url 'users:profile_edit' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-person-circle text-primary" style="font-size: 5rem;"></i>
+                        </div>
+                        <h5>{{ user_obj.get_full_name|default:user_obj.username }}</h5>
+                        <p class="text-muted">@{{ user_obj.username }}</p>
+                        
+                        {% if user_obj.is_superuser %}
+                            <span class="badge bg-danger">Суперпользователь</span>
+                        {% elif user_obj.is_staff %}
+                            <span class="badge bg-warning">Администратор</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Пользователь</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <h6 class="mb-3">Основная информация</h6>
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Имя пользователя:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.username }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Email:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.email }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Имя:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.first_name|default:"Не указано" }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Фамилия:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.last_name|default:"Не указано" }}
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h6 class="mb-3">Дополнительная информация</h6>
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Телефон:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.profile.phone|default:"Не указан" }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Отдел:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.profile.department|default:"Не указан" }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Должность:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.profile.position|default:"Не указана" }}
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h6 class="mb-3">Системная информация</h6>
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Дата регистрации:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.date_joined|date:"d.m.Y H:i" }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Последний вход:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {{ user_obj.last_login|date:"d.m.Y H:i"|default:"Никогда" }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <strong>Статус:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                {% if user_obj.is_active %}
+                                    <span class="badge bg-success">Активен</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Неактивен</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

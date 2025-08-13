@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Сервис-деск система{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0 text-danger">
+                    <i class="bi bi-exclamation-triangle"></i> {{ title }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-exclamation-triangle"></i> Внимание!
+                    </h6>
+                    <p class="mb-0">
+                        Вы собираетесь удалить пользователя <strong>{{ user_obj.get_full_name|default:user_obj.username }}</strong>.
+                        Это действие нельзя отменить.
+                    </p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6>Информация о пользователе:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Имя пользователя:</strong> {{ user_obj.username }}</p>
+                                <p><strong>Email:</strong> {{ user_obj.email }}</p>
+                                <p><strong>Полное имя:</strong> {{ user_obj.get_full_name|default:"Не указано" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Отдел:</strong> {{ user_obj.profile.department|default:"Не указан" }}</p>
+                                <p><strong>Должность:</strong> {{ user_obj.profile.position|default:"Не указана" }}</p>
+                                <p><strong>Дата регистрации:</strong> {{ user_obj.date_joined|date:"d.m.Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Удалить пользователя
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

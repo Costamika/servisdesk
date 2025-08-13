@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Пользователи - Сервис-деск система{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Поиск и фильтры -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-search"></i> Поиск пользователей
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    {% for field in search_form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger small">
+                                {% for error in field.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Найти
+                        </button>
+                        <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Сбросить
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Список пользователей -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-people"></i> Пользователи системы
+                    <span class="badge bg-secondary ms-2">{{ total_users }}</span>
+                </h5>
+                <a href="{% url 'users:user_create' %}" class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i> Создать пользователя
+                </a>
+            </div>
+            <div class="card-body">
+                {% if page_obj %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Пользователь</th>
+                                    <th>Email</th>
+                                    <th>Отдел</th>
+                                    <th>Статус</th>
+                                    <th>Роль</th>
+                                    <th>Дата регистрации</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in page_obj %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                            <br>
+                                            <small class="text-muted">@{{ user.username }}</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% if user.profile.department %}
+                                            {{ user.profile.department }}
+                                        {% else %}
+                                            <span class="text-muted">Не указан</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Активен</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Неактивен</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_superuser %}
+                                            <span class="badge bg-danger">Суперпользователь</span>
+                                        {% elif user.is_staff %}
+                                            <span class="badge bg-warning">Администратор</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Пользователь</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ user.date_joined|date:"d.m.Y" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'users:user_edit' user.id %}" class="btn btn-outline-secondary" title="Редактировать">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            {% if user != request.user %}
+                                            <a href="{% url 'users:user_toggle_active' user.id %}" class="btn btn-outline-{% if user.is_active %}danger{% else %}success{% endif %}" title="{% if user.is_active %}Деактивировать{% else %}Активировать{% endif %}">
+                                                <i class="bi bi-{% if user.is_active %}person-x{% else %}person-check{% endif %}"></i>
+                                            </a>
+                                            <a href="{% url 'users:user_delete' user.id %}" class="btn btn-outline-danger" title="Удалить">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Пагинация -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Навигация по страницам">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.department %}&department={{ request.GET.department }}{% endif %}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.department %}&department={{ request.GET.department }}{% endif %}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.department %}&department={{ request.GET.department }}{% endif %}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.department %}&department={{ request.GET.department }}{% endif %}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+                        <h5 class="text-muted mt-3">
+                            {% if request.GET %}
+                                По вашему запросу ничего не найдено
+                            {% else %}
+                                Пока нет пользователей в системе
+                            {% endif %}
+                        </h5>
+                        <p class="text-muted">
+                            {% if request.GET %}
+                                Попробуйте изменить параметры поиска
+                            {% else %}
+                                Создайте первого пользователя
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'users:user_create' %}" class="btn btn-primary">
+                            <i class="bi bi-person-plus"></i> Создать пользователя
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
