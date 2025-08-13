@@ -26,9 +26,9 @@ def ticket_list(request: HttpRequest) -> HttpResponse:
         # Администраторы видят все заявки
         tickets = Ticket.objects.select_related("created_by", "assigned_to").all()
     else:
-        # Пользователи видят только свои заявки
+        # Пользователи видят свои заявки и назначенные им заявки
         tickets = Ticket.objects.select_related("created_by", "assigned_to").filter(
-            created_by=request.user
+            Q(created_by=request.user) | Q(assigned_to=request.user)
         )
 
     # Применяем фильтры поиска
@@ -110,7 +110,11 @@ def ticket_detail(request: HttpRequest, ticket_id: int) -> HttpResponse:
     if is_admin(request.user):
         ticket = get_object_or_404(Ticket, id=ticket_id)
     else:
-        ticket = get_object_or_404(Ticket, id=ticket_id, created_by=request.user)
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        # Проверяем права доступа
+        if not (ticket.created_by == request.user or ticket.assigned_to == request.user):
+            from django.http import Http404
+            raise Http404("Заявка не найдена")
 
     # Получаем комментарии
     if is_admin(request.user):
@@ -155,7 +159,11 @@ def ticket_edit(request: HttpRequest, ticket_id: int) -> HttpResponse:
         ticket = get_object_or_404(Ticket, id=ticket_id)
         form_class = TicketAdminForm
     else:
-        ticket = get_object_or_404(Ticket, id=ticket_id, created_by=request.user)
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        # Проверяем права доступа
+        if not (ticket.created_by == request.user or ticket.assigned_to == request.user):
+            from django.http import Http404
+            raise Http404("Заявка не найдена")
         form_class = TicketForm
 
     # Проверяем права на редактирование
@@ -263,8 +271,10 @@ def dashboard(request: HttpRequest) -> HttpResponse:
             "is_admin": True,
         }
     else:
-        # Статистика для пользователей
-        user_tickets = Ticket.objects.filter(created_by=request.user)
+        # Статистика для пользователей (созданные + назначенные заявки)
+        user_tickets = Ticket.objects.filter(
+            Q(created_by=request.user) | Q(assigned_to=request.user)
+        )
         total_tickets = user_tickets.count()
         new_tickets = user_tickets.filter(status="new").count()
         in_progress_tickets = user_tickets.filter(status="in_progress").count()

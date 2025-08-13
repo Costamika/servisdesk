@@ -23,7 +23,7 @@ try:
     from config_ip_system import ALLOWED_HOSTS, DEBUG_MODE
 except ImportError:
     # Если файл конфигурации не найден, используем значения по умолчанию
-    ALLOWED_HOSTS = ["192.168.0.149", "localhost", "127.0.0.1", "0.0.0.0"]
+    ALLOWED_HOSTS = ["192.168.0.149", "localhost", "127.0.0.1", "0.0.0.0", "testserver"]
     DEBUG_MODE = True
 
 
