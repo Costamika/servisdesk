@@ -11,8 +11,9 @@ if path not in sys.path:
     sys.path.append(path)
 
 # Устанавливаем переменную окружения для Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'servisdesk.settings_production')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "servisdesk.settings_production")
 
 # Импортируем приложение Django
 from django.core.wsgi import get_wsgi_application
+
 application = get_wsgi_application()

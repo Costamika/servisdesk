@@ -11,9 +11,20 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import sys
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Импортируем конфигурацию IP и порта
+try:
+    sys.path.append(str(BASE_DIR))
+    from config_ip_system import ALLOWED_HOSTS, DEBUG_MODE
+except ImportError:
+    # Если файл конфигурации не найден, используем значения по умолчанию
+    ALLOWED_HOSTS = ["192.168.0.149", "localhost", "127.0.0.1", "0.0.0.0"]
+    DEBUG_MODE = True
 
 
 # Quick-start development settings - unsuitable for production
@@ -23,9 +34,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure--*y6-5=0wt@o_2m206s1w(y3tu6@8lhscpwcm(#9$op!i%by&@"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['192.168.0.149', 'localhost', '127.0.0.1']
+DEBUG = DEBUG_MODE
 
 
 # Application definition
