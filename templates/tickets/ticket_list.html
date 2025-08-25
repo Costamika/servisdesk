@@ -47,7 +47,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="bi bi-list-ul"></i> 
-                    {% if is_admin %}Все заявки{% else %}Мои заявки и назначенные{% endif %}
+                    {% if is_admin %}Все заявки{% else %}Мои заявки{% endif %}
                     <span class="badge bg-secondary ms-2">{{ total_tickets }}</span>
                 </h5>
                 <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">
@@ -177,7 +177,7 @@
                                 {% if is_admin %}
                                     Пока нет заявок в системе
                                 {% else %}
-                                    У вас пока нет заявок и назначений
+                                    У вас пока нет заявок
                                 {% endif %}
                             {% endif %}
                         </h5>
