@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import sys
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +22,7 @@ try:
     from config_ip_system import ALLOWED_HOSTS, DEBUG_MODE
 except ImportError:
     # Если файл конфигурации не найден, используем значения по умолчанию
-    ALLOWED_HOSTS = ["192.168.0.149", "localhost", "127.0.0.1", "0.0.0.0", "testserver"]
+    ALLOWED_HOSTS = ["192.168.0.149", "localhost", "127.0.0.1", "0.0.0.0"]
     DEBUG_MODE = True
 
 
